@@ -31,28 +31,67 @@ function Graph(params){
     top: this.canvas.offsetTop,
     left: this.canvas.offsetLeft
   };
+
+  this.events = {
+    calculatePosition: function(node){
+      if(node.id !== null && node.isVisited === false){
+        node.isVisited = true;
+        for (var i = 0; i < node.nodes.length; i++) {
+          if (node.nodes[i].isVisited === false) {
+            var shift = (node.nodes.length % 2 === 0) ? 0 : 0.2;
+            var division = (2 * Math.PI * i / node.nodes.length) + shift;
+            var distance = 100;
+            var canidateX = node.x + (distance * Math.cos(division));
+            var canidateY = node.y + (distance * Math.sin(division));
+            var shiftOffset = 0;
+            var distanceOffset = 0;
+            while(this.getCollisions(canidateX, canidateY, node.nodes[i].radius).length > 0){
+              if (shiftOffset > 2 * Math.PI) {
+                distanceOffset += node.radius;
+                shiftOffset = 0;
+              } else {
+                shiftOffset += 0.1;
+              }
+              canidateX = node.x + ((distance + distanceOffset) * Math.cos(division + shiftOffset));
+              canidateY = node.y + ((distance + distanceOffset) * Math.sin(division + shiftOffset));
+            }
+            node.nodes[i].moveTo(canidateX, canidateY);
+          }
+          this.events.calculatePosition(node.nodes[i]);
+        }
+      }
+    }.bind(this)
+  };
+
   this.canvas.addEventListener('click', function(e){
-    var currX = e.clientX - this.position.left;
-    var currY = e.clientY - this.position.top;
+    var currX = e.pageX - this.position.left;
+    var currY = e.pageY - this.position.top;
     var collidedNodes = this.getCollisions(currX, currY);
     for(var i in collidedNodes){
-      if (typeof(collidedNodes[i].events.onClick) === 'function'){
-        if (collidedNodes[i].events.onClick(e, collidedNodes[i], this) === false){
-          break;
-        }
+      if (collidedNodes[i].events.onClick(e, collidedNodes[i], this) === false){
+        break;
       }
     }
   }.bind(this));
+
   this.canvas.addEventListener('mousemove', function(e){
-    var currX = e.clientX - this.position.left;
-    var currY = e.clientY - this.position.top;
+    var currX = e.pageX - this.position.left;
+    var currY = e.pageY - this.position.top;
     var atLeastOne = false;
     for (var id in this.nodes) {
-      if (Math.sqrt(Math.pow(currX - this.nodes[id].x, 2) + Math.pow(currY - this.nodes[id].y, 2)) < this.nodes[id].radius){
+      var isCollide = (Math.sqrt(Math.pow(currX - this.nodes[id].x, 2) + Math.pow(currY - this.nodes[id].y, 2)) < this.nodes[id].radius);
+      if (isCollide && this.nodes[id].isHover === false){
         this.nodes[id].isHover = true;
-        atLeastOne = true;
-      } else {
+        if (this.nodes[id].events.onMouseenter(e, this.nodes[id], this) === false){
+          break;
+        }
+      } else if(!isCollide && this.nodes[id].isHover === true){
         this.nodes[id].isHover = false;
+        if (this.nodes[id].events.onMouseleave(e, this.nodes[id], this) === false){
+          break;
+        }
+      } else if(isCollide) {
+        atLeastOne = true;
       }
     }
     if (atLeastOne) {
@@ -128,23 +167,7 @@ Graph.prototype.drawNode = function(){
           node.currentY = node.startY + ((node.y - node.startY) * percent);
           needsRedraw = true;
         }
-        if (node.isHover) {
-          ctx.fillStyle = node.stroke;
-          ctx.strokeStyle = node.stroke;
-          ctx.beginPath();
-          ctx.arc(node.currentX, node.currentY, node.radius, 0, Math.PI*2, true);
-          ctx.stroke();
-          ctx.closePath();
-          ctx.fill();
-        } else {
-          ctx.fillStyle = node.color;
-          ctx.strokeStyle = node.stroke;
-          ctx.beginPath();
-          ctx.arc(node.currentX, node.currentY, node.radius, 0, Math.PI*2, true);
-          ctx.stroke();
-          ctx.closePath();
-          ctx.fill();
-        }
+        node.events.onRender(node, ctx);
         for (var i = 0; i < node.nodes.length; i++) {
           //Draw lines
           ctx.strokeStyle = '#999999';
@@ -190,35 +213,9 @@ Graph.prototype.translateGraph = function(x, y){
   }
 };
 
-Graph.prototype.calculateNode = function(node){
-  if(node.id !== null && node.isVisited === false){
-    node.isVisited = true;
-    for (var i = 0; i < node.nodes.length; i++) {
-      if (node.nodes[i].isVisited === false) {
-        var shift = (node.nodes.length % 2 === 0) ? 0 : 0.2;
-        var division = (2 * Math.PI * i / node.nodes.length) + shift;
-        var distance = 100;
-        var canidateX = node.x + (distance * Math.cos(division));
-        var canidateY = node.y + (distance * Math.sin(division));
-        var shiftOffset = 0;
-        var distanceOffset = 0;
-        while(this.getCollisions(canidateX, canidateY, node.nodes[i].radius).length > 0){
-          if (shiftOffset > 2 * Math.PI) {
-            distanceOffset += node.radius;
-            shiftOffset = 0;
-          } else {
-            shiftOffset += 0.1;
-          }
-          canidateX = node.x + ((distance + distanceOffset) * Math.cos(division + shiftOffset));
-          canidateY = node.y + ((distance + distanceOffset) * Math.sin(division + shiftOffset));
-        }
-        node.nodes[i].moveTo(canidateX, canidateY);
-      }
-      this.calculateNode(node.nodes[i]);
-    }
-  }
+Graph.prototype.calculatePosition = function(node){
+  return this.events.calculatePosition(node);
 };
-
 
 Graph.prototype.addNode = function(node){
   var now = new Date().getTime();
@@ -234,7 +231,7 @@ Graph.prototype.addNode = function(node){
     node.startY = node.currentY = node.y = this.centerY;
   }
   this.resetVisited();
-  this.calculateNode(this.primaryNode);
+  this.calculatePosition(this.primaryNode);
   this.centerGraph();
   this.draw();
 };
@@ -258,6 +255,7 @@ function Node(params){
   this.stroke = params.stroke ? params.stroke: "rgba(0, 168, 240, 0.9)";
   this.radius = params.radius ? params.radius: 10;
   this.id = null;
+  this.parentNode = null;
   this.isHover = false;
   this.isVisited = false;
   this.nodes = [];
@@ -267,22 +265,50 @@ function Node(params){
   this.x = 0;
   this.y = 0;
   this.events = {
-    onClick: function(e, node, graph){
-      var newNode = new Node({startX: node.currentX, startY: node.currentY});
-      node.addNeighbor(newNode);
-      newNode.addNeighbor(node);
-      //Also randomly pick one to be partner
-      var luckyNode = graph.nodes[Object.keys(graph.nodes)[Math.floor((Math.random() * Object.keys(graph.nodes).length))]];
-      luckyNode.addNeighbor(newNode);
-      newNode.addNeighbor(luckyNode);
-      graph.addNode(newNode);
+    onClick: params.onClick ? params.onClick: function(){},
+    onMouseenter: params.onMouseenter ? params.onMouseenter: function(){},
+    onMouseleave: params.onMouseleave ? params.onMouseleave: function(){},
+    onRender: params.onRender ? params.onRender: function(node, ctx, isHover){
+      if (node.isHover) {
+        ctx.fillStyle = node.stroke;
+        ctx.strokeStyle = node.stroke;
+        ctx.beginPath();
+        ctx.arc(node.currentX, node.currentY, node.radius, 0, Math.PI*2, true);
+        ctx.stroke();
+        ctx.closePath();
+        ctx.fill();
+      } else {
+        ctx.fillStyle = node.color;
+        ctx.strokeStyle = node.stroke;
+        ctx.beginPath();
+        ctx.arc(node.currentX, node.currentY, node.radius, 0, Math.PI*2, true);
+        ctx.stroke();
+        ctx.closePath();
+        ctx.fill();
+      }
     }
   };
+  this.meta = null;
 }
 
-Node.prototype.addNeighbor = function(node){
+Node.prototype.setMeta = function(obj){ this.meta = obj; };
+Node.prototype.getMeta = function(obj){ return this.meta; };
+
+Node.prototype.addConnected = function(node){
   //Set final location
   this.nodes.push(node);
+};
+
+Node.prototype.setParentNode = function(node){
+  this.parentNode = node;
+};
+
+Node.prototype.setLeftNode = function(node){
+  this.leftNode = node;
+};
+
+Node.prototype.setRightNode = function(node){
+  this.rightNode = node;
 };
 
 Node.prototype.moveTo = function(x, y){
