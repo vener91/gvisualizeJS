@@ -253,3 +253,9 @@ footer {
     color:#444;
   }
 }
+
+/* Custom CSS */
+.graph-box{
+  height: 400px;
+  width: 100%;
+}

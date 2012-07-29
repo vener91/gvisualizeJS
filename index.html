@@ -3,51 +3,67 @@
   <head>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="chrome=1">
-    <title>Gvisualizejs by vener91</title>
+    <title>gVisualize - Interactive graph visualizer</title>
 
-    <link rel="stylesheet" href="stylesheets/styles.css">
-    <link rel="stylesheet" href="stylesheets/pygment_trac.css">
+    <link rel="stylesheet" href="res/css/styles.css">
+    <link rel="stylesheet" href="res/css/pygment_trac.css">
+    <script src="res/js/gvisualize.js" type="text/javascript" charset="utf-8"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js" type="text/javascript" charset="utf-8"></script>
     <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
     <!--[if lt IE 9]>
     <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
     <![endif]-->
+    <script>
+      $("document").ready(function(){
+        var container = $('#sample-box').get(0);
+
+        var graph = new Graph({
+          container: container
+        });
+
+        primaryNode = new Node({color: 'rgba(200, 20, 20, 0.5)'});
+        graph.addNode(primaryNode);
+      });
+    </script>
   </head>
   <body>
     <div class="wrapper">
       <header>
-        <h1>Gvisualizejs</h1>
-        <p>Javascript Graph visualizer</p>
-
+        <h1>gVisualize</h1>
+        <p>Interactive javascript Graph visualizer</p>
         <p class="view"><a href="https://github.com/vener91/gvisualizeJS">View the Project on GitHub <small>vener91/gvisualizeJS</small></a></p>
-
-
         <ul>
           <li><a href="https://github.com/vener91/gvisualizeJS/zipball/master">Download <strong>ZIP File</strong></a></li>
           <li><a href="https://github.com/vener91/gvisualizeJS/tarball/master">Download <strong>TAR Ball</strong></a></li>
           <li><a href="https://github.com/vener91/gvisualizeJS">View On <strong>GitHub</strong></a></li>
         </ul>
+        <h3>Examples</h3>
+        <p class="view">
+          <a href="#redblacktree">Red Black Trees<small>self-balanced trees</small></a>
+          <a href="#sandbox">Sandbox<small>try it out</small></a>
+        </p>
+        <h3>Documentation</h3>
+        <p class="view">
+          <a href="#graph">Graph<small>Main graph class</small></a>
+          <a href="#node">Node<small>Nodes class</small></a>
+        </p>
       </header>
       <section>
-        <h3>Welcome to GitHub Pages.</h3>
+        <div class="graph-box" id="sample-box">
+        </div>
+        <p>This is a small graph visualization library suitable for education and visualizing graph/tree data.</p>
 
-<p>This automatic page generator is the easiest way to create beautiful pages for all of your projects. Author your page content here using GitHub Flavored Markdown, select a template crafted by a designer, and publish. After your page is generated, you can check out the new branch:</p>
+        <p>If you're using the GitHub for Mac, simply sync your repository and you'll see the new branch.</p>
 
-<pre><code>$ cd your_repo_root/repo_name
-$ git fetch origin
-$ git checkout gh-pages
-</code></pre>
+        <h3>Red Black Trees</h3>
 
-<p>If you're using the GitHub for Mac, simply sync your repository and you'll see the new branch.</p>
+        <p>I hope you remember what you learnt in college</p>
 
-<h3>Designer Templates</h3>
+        <h3>Playground</h3>
 
-<p>We've crafted some handsome templates for you to use. Go ahead and continue to layouts to browse through them. You can easily go back to edit your page before publishing. After publishing your page, you can revisit the page generator and switch to another theme. Your Page content will be preserved if it remained markdown format.</p>
+        <p>If you prefer to not use the automatic generator, push a branch named <code>gh-pages</code> to your repository to create a page manually. In addition to supporting regular HTML content, GitHub Pages support Jekyll, a simple, blog aware static site generator written by our own Tom Preston-Werner. Jekyll makes it easy to create site-wide headers and footers without having to copy them across every page. It also offers intelligent blog support and other advanced templating features.</p>
 
-<h3>Rather Drive Stick?</h3>
-
-<p>If you prefer to not use the automatic generator, push a branch named <code>gh-pages</code> to your repository to create a page manually. In addition to supporting regular HTML content, GitHub Pages support Jekyll, a simple, blog aware static site generator written by our own Tom Preston-Werner. Jekyll makes it easy to create site-wide headers and footers without having to copy them across every page. It also offers intelligent blog support and other advanced templating features.</p>
-
-<h3>Authors and Contributors</h3>
+        <h3>Documentation</h3>
 
 <p>You can <a href="https://github.com/blog/821" class="user-mention">@mention</a> a GitHub username to generate a link to their profile. The resulting <code>&lt;a&gt;</code> element will link to the contributor's GitHub Profile. For example: In 2007, Chris Wanstrath (<a href="https://github.com/defunkt" class="user-mention">@defunkt</a>), PJ Hyett (<a href="https://github.com/pjhyett" class="user-mention">@pjhyett</a>), and Tom Preston-Werner (<a href="https://github.com/mojombo" class="user-mention">@mojombo</a>) founded GitHub.</p>
 
@@ -60,7 +76,7 @@ $ git checkout gh-pages
         <p><small>Hosted on GitHub Pages &mdash; Theme by <a href="https://github.com/orderedlist">orderedlist</a></small></p>
       </footer>
     </div>
-    <script src="javascripts/scale.fix.js"></script>
+    <script src="res/js/scale.fix.js"></script>
     
   </body>
 </html>
