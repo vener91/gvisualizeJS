@@ -15,14 +15,9 @@
     <![endif]-->
     <script>
       $("document").ready(function(){
-        var container = $('#sample-box').get(0);
-
-        var graph = new Graph({
-          container: container
-        });
-
-        primaryNode = new Node({color: 'rgba(200, 20, 20, 0.5)'});
-        graph.addNode(primaryNode);
+          $.getScript('res/examples/sample.js', function(script){
+              $('#sample-code').text(script);
+          })
       });
     </script>
   </head>
@@ -54,6 +49,7 @@
         <p>This is a small graph visualization library suitable for education and visualizing graph/tree data.</p>
 
         <p>If you're using the GitHub for Mac, simply sync your repository and you'll see the new branch.</p>
+        <pre><code id="sample-code"></code></pre>
 
         <h3>Red Black Trees</h3>
 

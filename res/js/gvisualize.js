@@ -22,7 +22,6 @@ function Graph(params){
   this.container.appendChild(this.canvas);
   this.bufferCanvas = document.createElement('canvas');
   this.ctx = this.canvas.getContext('2d');
-  console.info(this.ctx);
   this.bufferCtx = this.bufferCanvas.getContext('2d');
   this.primaryNode = null;
   this.setDimensions(this.container.offsetWidth, this.container.offsetHeight);
